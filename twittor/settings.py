@@ -27,7 +27,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'twittor.urls'
+ROOT_URLCONF = 'twittor_listas.urls'
 
 TEMPLATES = [
     {
@@ -45,7 +45,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'twittor.wsgi.application'
+WSGI_APPLICATION = 'twittor_listas.wsgi.application'
 
 DATABASES = {
     'default': {

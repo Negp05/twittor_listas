@@ -1,10 +1,24 @@
+import re
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import HttpResponseForbidden
-from .models import Tweet, Like, Comment, Follow, UserProfile
-from .forms import TweetForm, CommentForm, SignUpForm, ProfileForm
+from django.http import HttpResponseForbidden, JsonResponse
+from django.db.models import Q
+from django.template.loader import render_to_string
+# --- IMPORTACIONES ACTUALIZADAS ---
+from .models import Tweet, Like, Comment, Follow, UserProfile, Lista, MiembroDeLista
+from .forms import TweetForm, CommentForm, SignUpForm, ProfileForm, ListForm
+# -----------------------------------
+
+HASHTAG_RE = re.compile(r"(#\w+)")
+
+def _create_notification(actor, recipient, verb, tweet=None):
+    if actor == recipient:
+        return
+    from .models import Notification
+    Notification.objects.create(actor=actor, recipient=recipient, verb=verb, tweet=tweet)
+
 
 def signup_view(request):
     if request.user.is_authenticated:
@@ -40,15 +54,7 @@ def explore(request):
     qs = Tweet.objects.select_related('user', 'user__userprofile').all()[:100]
     return render(request, 'core/timeline.html', {'tweets': qs, 'form': TweetForm()})
 
-@login_required
-def like_toggle(request, pk):
-    if request.method != 'POST':
-        return HttpResponseForbidden('Solo POST')
-    tweet = get_object_or_404(Tweet, pk=pk)
-    like, created = Like.objects.get_or_create(user=request.user, tweet=tweet)
-    if not created:
-        like.delete()
-    return redirect(request.META.get('HTTP_REFERER', tweet.get_absolute_url()))
+# NOTA: La vista like_toggle duplicada ha sido eliminada. Se mantiene la versión HTMX al final.
 
 @login_required
 def tweet_detail(request, pk):
@@ -89,20 +95,6 @@ def profile(request, username):
     form = ProfileForm(instance=profile) if is_me else None
     ctx = {'profile_user': user, 'profile': profile, 'is_me': is_me, 'is_following': is_following, 'tweets': tweets, 'form': form}
     return render(request, 'core/profile.html', ctx)
-
-
-import re
-from django.db.models import Q
-from django.template.loader import render_to_string
-from django.http import JsonResponse
-
-HASHTAG_RE = re.compile(r"(#\w+)")
-
-def _create_notification(actor, recipient, verb, tweet=None):
-    if actor == recipient:
-        return
-    from .models import Notification
-    Notification.objects.create(actor=actor, recipient=recipient, verb=verb, tweet=tweet)
 
 @login_required
 def search(request):
@@ -156,6 +148,94 @@ def quote(request, pk):
     else:
         form = TweetForm()
     return render(request, 'core/quote.html', {'original': tw, 'form': form})
+
+# --- VISTAS PARA LISTAS DE USUARIOS (NUEVAS FUNCIONALIDADES) ---
+
+@login_required
+def list_create(request):
+    """Permite al usuario crear una nueva lista."""
+    if request.method == 'POST':
+        form = ListForm(request.POST)
+        if form.is_valid():
+            lista = form.save(commit=False)
+            lista.creador = request.user
+            lista.save()
+            return redirect('my_lists') 
+    else:
+        form = ListForm()
+        
+    return render(request, 'core/list_create.html', {'form': form, 'title': 'Crear Nueva Lista'})
+
+
+@login_required
+def my_lists(request):
+    """Muestra todas las listas creadas por el usuario."""
+    listas = Lista.objects.filter(creador=request.user).order_by('-fecha_creacion')
+    return render(request, 'core/my_lists.html', {'listas': listas})
+
+
+@login_required
+def list_feed(request, list_pk):
+    """Muestra el timeline filtrado por los miembros de una lista."""
+    lista = get_object_or_404(Lista, pk=list_pk)
+    
+    # Restricción de acceso a listas privadas
+    if lista.es_privada and lista.creador != request.user:
+        return HttpResponseForbidden("No tienes permiso para ver esta lista privada.")
+
+    # 1. Obtener IDs de los miembros de la lista
+    member_ids = list(MiembroDeLista.objects.filter(lista=lista).values_list('usuario_id', flat=True))
+
+    # 2. Obtener tweets de esos miembros
+    tweets = Tweet.objects.filter(user_id__in=member_ids).select_related('user', 'user__userprofile').order_by('-created_at')
+
+    form = TweetForm() 
+    
+    ctx = {
+        'lista': lista,
+        'tweets': tweets,
+        'form': form,
+        'title': f'Lista: {lista.nombre}'
+    }
+    return render(request, 'core/list_feed.html', ctx)
+
+
+@login_required
+def list_members(request, list_pk):
+    """Muestra y permite gestionar a los miembros de una lista."""
+    lista = get_object_or_404(Lista, pk=list_pk)
+    
+    # Solo el creador puede gestionar miembros
+    if lista.creador != request.user:
+        return HttpResponseForbidden("Solo el creador puede gestionar los miembros.")
+
+    # Miembros actuales
+    miembros_actuales = lista.miembros.all()
+    
+    # Lógica para añadir/eliminar miembros (generalmente manejado por POST/AJAX)
+    if request.method == 'POST':
+        user_id_to_manage = request.POST.get('user_id')
+        action = request.POST.get('action')
+        
+        try:
+            user_to_manage = User.objects.get(pk=user_id_to_manage)
+            
+            if action == 'add':
+                # Crear la relación MiembroDeLista
+                MiembroDeLista.objects.get_or_create(lista=lista, usuario=user_to_manage)
+            elif action == 'remove':
+                # Eliminar la relación
+                MiembroDeLista.objects.filter(lista=lista, usuario=user_to_manage).delete()
+        except User.DoesNotExist:
+            pass # Ignorar si el usuario no existe
+
+        # Usar redirect para prevenir doble envío
+        return redirect('list_members', list_pk=list_pk)
+
+    # Puedes añadir la lista de todos los usuarios para la búsqueda aquí si es necesario
+    return render(request, 'core/list_members.html', {'lista': lista, 'miembros': miembros_actuales})
+
+# --- FIN DE VISTAS DE LISTAS ---
 
 @login_required
 def like_toggle(request, pk):

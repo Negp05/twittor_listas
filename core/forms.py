@@ -1,10 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Tweet, Comment, UserProfile
+from .models import Tweet, Comment, UserProfile, Lista 
 
 BASE_INPUT = {'class': 'input'}
-BASE_AREA  = {'class': 'input min-h-[100px]'}  # textarea style
+BASE_AREA = {'class': 'input min-h-[100px]'} 
 BASE_FILE  = {'class': 'file-input'}
 
 class TweetForm(forms.ModelForm):
@@ -45,3 +45,17 @@ class ProfileForm(forms.ModelForm):
             'bio': forms.TextInput(attrs={'placeholder': 'Cuéntanos algo sobre ti', **BASE_INPUT}),
             'avatar': forms.ClearableFileInput(attrs={**BASE_FILE})
         }
+
+# --- NUEVO FORMULARIO PARA LA TAREA DE LISTAS ---
+
+class ListForm(forms.ModelForm):
+    """Formulario para crear y editar una Lista."""
+    class Meta:
+        model = Lista
+        fields = ['nombre', 'descripcion', 'es_privada']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'placeholder': 'Nombre de la lista', **BASE_INPUT}),
+            'descripcion': forms.Textarea(attrs={'placeholder': 'Descripción de la lista (opcional)', 'rows': 3, **BASE_AREA}),
+        }
+
+# --- FIN DE FORMULARIO DE LISTAS ---

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 
+# --- Modelos Existentes ---
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.CharField(max_length=180, blank=True)
@@ -77,3 +79,50 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'{self.actor} -> {self.recipient}: {self.verb}'
+
+
+# --- NUEVOS MODELOS PARA LA TAREA DE LISTAS (FEAT/LISTAS) ---
+
+class Lista(models.Model):
+    """Define una lista de usuarios."""
+    nombre = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=255, blank=True, null=True)
+    # Lista pública o privada
+    es_privada = models.BooleanField(default=False) 
+    
+    # El creador de la lista
+    creador = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='listas_creadas'
+    )
+    
+    # Los usuarios que pertenecen a esta lista (relación Many-to-Many usando MiembroDeLista)
+    miembros = models.ManyToManyField(
+        User,
+        related_name='listas_a_las_que_pertenece',
+        through='MiembroDeLista'
+    )
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Listas"
+
+    def __str__(self):
+        return self.nombre
+
+
+class MiembroDeLista(models.Model):
+    """Tabla intermedia para la relación de pertenencia."""
+    lista = models.ForeignKey(Lista, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_agregado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Esto previene que un usuario sea agregado dos veces a la misma lista.
+        unique_together = ('lista', 'usuario') 
+        verbose_name = "Miembro de Lista"
+        verbose_name_plural = "Miembros de Lista"
+        
+    def __str__(self):
+        return f"{self.usuario.username} en {self.lista.nombre}"

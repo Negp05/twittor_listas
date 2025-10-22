@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-8">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Mis Listas</h2>
+    
+    <a href="{% url 'list_create' %}" class="inline-block bg-green-500 text-white py-2 px-4 rounded-full mb-4 hover:bg-green-600 transition duration-150">
+        + Crear Nueva Lista
+    </a>
+
+    {% if listas %}
+        <div class="space-y-4">
+            {% for lista in listas %}
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-lg transition duration-150 border">
+                    <h3 class="text-xl font-semibold text-blue-600 flex justify-between items-center">
+                        <a href="{% url 'list_feed' list_pk=lista.pk %}" class="hover:underline">
+                            {{ lista.nombre }}
+                        </a>
+                        {% if lista.es_privada %}
+                            <span class="text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">Privada</span>
+                        {% endif %}
+                    </h3>
+                    <p class="text-gray-600 mt-1 text-sm">{{ lista.descripcion|default:"Sin descripción." }}</p>
+                    <div class="mt-3 text-sm text-gray-500 flex justify-between items-center border-t pt-2">
+                        <span>
+                            Creada por: <span class="font-medium text-gray-800">@{{ lista.creador.username }}</span>
+                        </span>
+                        <a href="{% url 'list_members' list_pk=lista.pk %}" class="text-blue-500 hover:text-blue-700 font-medium">
+                            Gestionar Miembros ({{ lista.miembros.count }})
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500 mt-6 bg-yellow-50 p-4 border border-yellow-200 rounded-lg">Aún no has creado ninguna lista. ¡Crea la primera para organizar tu feed!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Agregar tweet a colección</h2>
+
+<p><strong>Tweet:</strong> {{ tweet.contenido }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <label for="coleccion_id">Selecciona una colección:</label>
+  <select name="coleccion_id" id="coleccion_id">
+    {% for coleccion in colecciones %}
+      <option value="{{ coleccion.id }}">{{ coleccion.nombre }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Agregar</button>
+</form>
+{% endblock %}

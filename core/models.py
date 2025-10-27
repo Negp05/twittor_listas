@@ -126,3 +126,15 @@ class MiembroDeLista(models.Model):
         
     def __str__(self):
         return f"{self.usuario.username} en {self.lista.nombre}"
+    
+#modelo coleccion
+class Coleccion(models.Model):
+    nombre = models.CharField(max_length=100)
+    descripcion = models.TextField(blank=True)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='colecciones')
+    tweets = models.ManyToManyField('Tweet', blank=True, related_name='colecciones')
+    creada_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.usuario.username}"
+    #fin modelo coleccion

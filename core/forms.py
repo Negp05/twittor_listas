@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Tweet, Comment, UserProfile, Lista 
+from .models import Coleccion
 
 BASE_INPUT = {'class': 'input'}
 BASE_AREA = {'class': 'input min-h-[100px]'} 
@@ -59,3 +60,10 @@ class ListForm(forms.ModelForm):
         }
 
 # --- FIN DE FORMULARIO DE LISTAS ---
+
+#formulario para crear colecciones
+class ColeccionForm(forms.ModelForm):
+    class Meta:
+        model = Coleccion
+        fields = ['nombre', 'descripcion']
+#fin de formulario crear colecciones

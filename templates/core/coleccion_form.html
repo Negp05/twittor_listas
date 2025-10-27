@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Nueva Colección - Twittor{% endblock %}
+{% block content %}
+
+<div class="max-w-md mx-auto mt-10">
+  <div class="card p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">Nueva colección</h1>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Nombre -->
+      <div>
+        <label for="{{ form.nombre.id_for_label }}" class="block text-sm font-semibold mb-1">
+          Nombre
+        </label>
+        {{ form.nombre }}
+        {% if form.nombre.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.nombre.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-semibold mb-1">
+          Descripción
+        </label>
+        {{ form.descripcion }}
+        {% if form.descripcion.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.descripcion.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Botones -->
+      <div class="flex justify-between items-center">
+        <a href="{% url 'lista_colecciones' %}" 
+           class="btn-outline px-4 py-2 text-sm">← Cancelar</a>
+        <button type="submit"
+                class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium transition">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

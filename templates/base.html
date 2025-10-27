@@ -53,6 +53,20 @@
     <div class="flex items-center gap-2 ml-auto">
       <a href="{% url 'explore' %}" class="chip">Explorar</a>
       <a href="{% url 'notifications' %}" class="chip">Notificaciones</a>
+      
+
+      <!-- 🔹 Nuevo enlace "Colecciones" -->
+{% if user.is_authenticated %}
+<a href="{% url 'lista_colecciones' %}" class="chip flex items-center gap-1">
+  <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 7h18M3 12h18M3 17h18" />
+  </svg>
+  Colecciones
+</a>
+{% endif %}
+<!-- Fin de nuevo enlace "Colecciones" -->
+
 
       <!-- 🔹 Nuevo enlace "Mis Listas" -->
       {% if user.is_authenticated %}

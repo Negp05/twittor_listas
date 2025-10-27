@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 # --- IMPORTACIONES ACTUALIZADAS ---
 from .models import Tweet, Like, Comment, Follow, UserProfile, Lista, MiembroDeLista
 from .forms import TweetForm, CommentForm, SignUpForm, ProfileForm, ListForm
+from .models import Coleccion, Tweet
+from .forms import ColeccionForm
 # -----------------------------------
 
 HASHTAG_RE = re.compile(r"(#\w+)")
@@ -253,3 +255,75 @@ def like_toggle(request, pk):
         html = render_to_string('components/like_button.html', {'t': tweet, 'user': request.user})
         return JsonResponse({'html': html})
     return redirect(request.META.get('HTTP_REFERER', tweet.get_absolute_url()))
+
+#vistas CRUD basico
+@login_required
+def lista_colecciones(request):
+    colecciones = Coleccion.objects.filter(usuario=request.user)
+    return render(request, 'core/colecciones_list.html', {'colecciones': colecciones})
+
+@login_required
+def crear_coleccion(request):
+    if request.method == 'POST':
+        form = ColeccionForm(request.POST)
+        if form.is_valid():
+            coleccion = form.save(commit=False)
+            coleccion.usuario = request.user
+            coleccion.save()
+            return redirect('lista_colecciones')
+    else:
+        form = ColeccionForm()
+    return render(request, 'core/coleccion_form.html', {'form': form})
+
+@login_required
+def detalle_coleccion(request, pk):
+    coleccion = get_object_or_404(Coleccion, pk=pk, usuario=request.user)
+    tweets = coleccion.tweets.all()
+    return render(request, 'core/coleccion_detalle.html', {'coleccion': coleccion, 'tweets': tweets})
+
+@login_required
+def eliminar_coleccion(request, pk):
+    coleccion = get_object_or_404(Coleccion, pk=pk, usuario=request.user)
+    if request.method == 'POST':
+        coleccion.delete()
+        return redirect('lista_colecciones')
+    return render(request, 'core/coleccion_confirm_delete.html', {'coleccion': coleccion})
+
+
+#vista para agregar tweets a colecciones
+@login_required
+def agregar_a_coleccion(request, tweet_id):
+    tweet = get_object_or_404(Tweet, id=tweet_id)
+    colecciones = Coleccion.objects.filter(usuario=request.user)
+
+    if request.method == 'POST':
+        coleccion_id = request.POST.get('coleccion_id')
+        coleccion = get_object_or_404(Coleccion, id=coleccion_id, usuario=request.user)
+        coleccion.tweets.add(tweet)
+        return redirect('feed')  # Cambia 'feed' por el nombre de tu vista principal si se llama distinto
+
+    return render(request, 'core/agregar_a_coleccion.html', {
+        'tweet': tweet,
+        'colecciones': colecciones
+    })
+#fin de vista agregar tweets a colecciones
+
+#vista ajax para agregar tweets a colecciones
+@login_required
+def agregar_a_coleccion_ajax(request):
+    if request.method == 'POST':
+        tweet_id = request.POST.get('tweet_id')
+        coleccion_id = request.POST.get('coleccion_id')
+
+        tweet = get_object_or_404(Tweet, id=tweet_id)
+        coleccion = get_object_or_404(Coleccion, id=coleccion_id, usuario=request.user)
+
+        coleccion.tweets.add(tweet)
+        return JsonResponse({'success': True, 'message': 'Tweet agregado correctamente.'})
+
+    elif request.method == 'GET':
+        colecciones = list(Coleccion.objects.filter(usuario=request.user).values('id', 'nombre'))
+        return JsonResponse({'colecciones': colecciones})
+
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'}, status=400)
+#fin de vista ajax para agregar tweets a colecciones

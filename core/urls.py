@@ -18,4 +18,11 @@ urlpatterns = [
     path('listas/yo/', views.my_lists, name='my_lists'),
     path('listas/<int:list_pk>/feed/', views.list_feed, name='list_feed'),
     path('listas/<int:list_pk>/miembros/', views.list_members, name='list_members'),
+    path('colecciones/', views.lista_colecciones, name='lista_colecciones'),
+    path('colecciones/nueva/', views.crear_coleccion, name='crear_coleccion'),
+    path('colecciones/<int:pk>/', views.detalle_coleccion, name='detalle_coleccion'),
+    path('colecciones/<int:pk>/eliminar/', views.eliminar_coleccion, name='eliminar_coleccion'),
+    path('tweets/<int:tweet_id>/agregar-a-coleccion/', views.agregar_a_coleccion, name='agregar_a_coleccion'),
+    path('ajax/agregar-a-coleccion/', views.agregar_a_coleccion_ajax, name='agregar_a_coleccion_ajax'),
+
 ]

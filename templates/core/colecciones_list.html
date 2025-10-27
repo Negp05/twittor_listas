@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Mis Colecciones - Twittor{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Título principal -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Tus colecciones</h1>
+    <a href="{% url 'crear_coleccion' %}"
+       class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-soft transition">
+      + Nueva colección
+    </a>
+  </div>
+
+  {% if colecciones %}
+    <!-- Lista de colecciones -->
+    <div class="grid gap-4">
+      {% for c in colecciones %}
+      <div class="card p-5 flex justify-between items-center hover:shadow-md transition">
+        <div>
+          <a href="{% url 'detalle_coleccion' c.id %}" class="text-lg font-semibold hover:underline">
+            {{ c.nombre }}
+          </a>
+          {% if c.descripcion %}
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ c.descripcion }}</p>
+          {% endif %}
+          <p class="text-xs text-gray-400 mt-1">
+            {{ c.tweets.count }} tweet{{ c.tweets.count|pluralize }} guardado{{ c.tweets.count|pluralize }}
+          </p>
+        </div>
+        <form action="{% url 'eliminar_coleccion' c.id %}" method="post" onsubmit="return confirm('¿Eliminar esta colección?')" class="ml-3">
+          {% csrf_token %}
+          <button class="text-red-500 hover:text-red-700 text-sm flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Eliminar
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- Mensaje vacío -->
+    <div class="text-center py-12">
+      <p class="text-gray-500 text-lg mb-3">Aún no has creado ninguna colección.</p>
+      <a href="{% url 'crear_coleccion' %}"
+         class="inline-block px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition">
+        Crear tu primera colección
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

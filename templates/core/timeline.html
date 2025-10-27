@@ -9,7 +9,9 @@
       <form action="{% url 'timeline' %}" method="post" enctype="multipart/form-data" class="space-y-3">
         {% csrf_token %}
         {{ form.non_field_errors }}
-        {% if form.errors %}<div class="text-red-600 text-sm">{{ form.errors }}</div>{% endif %}
+        {% if form.errors %}
+          <div class="text-red-600 text-sm">{{ form.errors }}</div>
+        {% endif %}
         {{ form.content }}
         <div class="flex items-center justify-between">
           {{ form.image }}
@@ -22,14 +24,14 @@
     <article class="card p-4">
       <div class="flex gap-3">
         <a href="{% url 'profile' t.user.username %}">
-  {% if t.user.userprofile.avatar %}
-    <img src="{{ t.user.userprofile.avatar.url }}" class="w-10 h-10 rounded-full object-cover" alt="@{{ t.user.username }}">
-  {% else %} 
-    <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center font-semibold">
-      {{ t.user.username|first|upper }}
-    </div>
-  {% endif %}
-</a>
+          {% if t.user.userprofile.avatar %}
+            <img src="{{ t.user.userprofile.avatar.url }}" class="w-10 h-10 rounded-full object-cover" alt="@{{ t.user.username }}">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center font-semibold">
+              {{ t.user.username|first|upper }}
+            </div>
+          {% endif %}
+        </a>
         <div class="flex-1">
           <div class="flex items-center gap-2">
             <a href="{% url 'profile' t.user.username %}" class="font-semibold hover:underline">@{{ t.user.username }}</a>
@@ -37,12 +39,12 @@
           </div>
           <a href="{{ t.get_absolute_url }}">
             <p class="mt-1 whitespace-pre-wrap">{{ t.content|linkify|safe }}</p>
-          {% if t.parent %}
-            <a href="{{ t.parent.get_absolute_url }}" class="block border rounded-xl p-3 mt-2 text-sm bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
-              <span class="text-gray-500">Publicación original de @{{ t.parent.user.username }}:</span>
-              <div class="whitespace-pre-wrap">{{ t.parent.content|linkify|safe }}</div>
-            </a>
-          {% endif %}
+            {% if t.parent %}
+              <a href="{{ t.parent.get_absolute_url }}" class="block border rounded-xl p-3 mt-2 text-sm bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+                <span class="text-gray-500">Publicación original de @{{ t.parent.user.username }}:</span>
+                <div class="whitespace-pre-wrap">{{ t.parent.content|linkify|safe }}</div>
+              </a>
+            {% endif %}
           </a>
           {% if t.image %}
             <img src="{{ t.image.url }}" class="mt-2 rounded-xl border dark:border-gray-700 w-full h-auto max-h-[70vh] object-cover" alt="imagen">
@@ -50,8 +52,19 @@
           <div class="mt-3 flex items-center gap-4">
             {% include "components/like_button.html" with t=t %}
             <a href="{{ t.get_absolute_url }}" class="text-sm px-3 py-1 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800 transition">Responder</a>
-            <form action="{% url 'retweet' t.pk %}" method="post" class="inline">{% csrf_token %}<button class="text-sm px-3 py-1 rounded-lg border">Retwittear</button></form>
+            <form action="{% url 'retweet' t.pk %}" method="post" class="inline">
+              {% csrf_token %}
+              <button class="text-sm px-3 py-1 rounded-lg border">Retwittear</button>
+            </form>
             <a href="{% url 'quote' t.pk %}" class="text-sm px-3 py-1 rounded-lg border">Citar</a>
+
+            <!-- 📁 Botón AJAX para agregar a colección -->
+            <button 
+              type="button"
+              class="text-sm px-3 py-1 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+              onclick="abrirModalColeccion({{ t.id }})">
+              Guardar en colección
+            </button>
           </div>
         </div>
       </div>
@@ -68,4 +81,79 @@
     </div>
   </aside>
 </div>
+
+<!-- 🌙 Modal para seleccionar colección -->
+<div id="modalColeccion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white dark:bg-gray-900 rounded-xl p-6 w-80 shadow-xl text-center">
+    <h3 class="text-lg font-semibold mb-3">Guardar en colección</h3>
+    <select id="selectColeccion" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-800 dark:border-gray-700">
+      <option value="">Cargando...</option>
+    </select>
+    <div class="flex justify-center gap-3">
+      <button onclick="cerrarModal()" class="px-4 py-2 rounded-lg border dark:border-gray-700">Cancelar</button>
+      <button id="btnGuardar" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tweetSeleccionado = null;
+
+function abrirModalColeccion(tweetId) {
+  tweetSeleccionado = tweetId;
+  const modal = document.getElementById('modalColeccion');
+  modal.classList.remove('hidden');
+
+  // Cargar colecciones vía AJAX
+  fetch("{% url 'agregar_a_coleccion_ajax' %}")
+    .then(response => response.json())
+    .then(data => {
+      const select = document.getElementById('selectColeccion');
+      select.innerHTML = "";
+      if (data.colecciones.length === 0) {
+        select.innerHTML = "<option>No tienes colecciones</option>";
+      } else {
+        data.colecciones.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = c.nombre;
+          select.appendChild(opt);
+        });
+      }
+    });
+}
+
+function cerrarModal() {
+  document.getElementById('modalColeccion').classList.add('hidden');
+}
+
+document.getElementById('btnGuardar').addEventListener('click', () => {
+  const coleccionId = document.getElementById('selectColeccion').value;
+  if (!coleccionId) return alert("Selecciona una colección");
+
+  // ✅ Obtener token CSRF desde el formulario en el DOM
+  const csrftokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  const csrftoken = csrftokenInput ? csrftokenInput.value : '';
+
+  const formData = new FormData();
+  formData.append('tweet_id', tweetSeleccionado);
+  formData.append('coleccion_id', coleccionId);
+  formData.append('csrfmiddlewaretoken', csrftoken);
+
+  fetch("{% url 'agregar_a_coleccion_ajax' %}", {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      cerrarModal();
+      alert("Tweet agregado a la colección ✅");
+    } else {
+      alert("Error: " + data.message);
+    }
+  })
+  .catch(error => console.error("Error en la petición:", error));
+});
+</script>
 {% endblock %}

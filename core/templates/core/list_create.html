@@ -1,31 +1,60 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block content %}
-<div class="max-w-xl mx-auto mt-8 bg-white p-6 rounded-lg shadow-md">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Crear Nueva Lista</h2>
-    
-    <form method="post" action="{% url 'list_create' %}">
-        {% csrf_token %}
-        
-        {% for field in form %}
-            <div class="mb-4">
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.help_text %}
-                    <p class="text-xs text-gray-500 mt-1">{{ field.help_text|safe }}</p>
-                {% endif %}
-                {% for error in field.errors %}
-                    <p class="text-sm text-red-600">{{ error }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
+{% block title %}Crear Nueva Lista | Twittor{% endblock %}
 
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition duration-150">
-            Crear Lista
+{% block content %}
+<div class="max-w-xl mx-auto mt-8">
+  <div class="card p-6 shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Crear Nueva Lista</h2>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <!-- Nombre -->
+      <div>
+        <label for="{{ form.nombre.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+          Nombre de la Lista
+        </label>
+        {{ form.nombre }}
+        {% if form.nombre.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.nombre.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+          Descripción
+        </label>
+        {{ form.descripcion }}
+        {% if form.descripcion.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.descripcion.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Privacidad -->
+      <div class="flex items-center space-x-2">
+        {{ form.es_privada }}
+        <label for="{{ form.es_privada.id_for_label }}" class="text-gray-700 text-sm">
+          Hacer esta lista privada
+        </label>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex justify-between items-center mt-6">
+        <a href="{% url 'my_lists' %}"
+           class="text-gray-600 hover:text-gray-800 text-sm font-medium transition">
+           ← Volver a Mis Listas
+        </a>
+
+        <button type="submit"
+                class="bg-blue-600 text-white px-5 py-2 rounded-full font-medium hover:bg-blue-700 transition">
+          Crear Lista
         </button>
+      </div>
     </form>
+  </div>
 </div>
 {% endblock %}

@@ -8,7 +8,7 @@
 <div class="max-w-xl mx-auto mt-8">
   <div class="flex justify-between items-center border-b dark:border-white/10 pb-2 mb-6">
     <h2 class="text-2xl font-bold">Gestionar Miembros de: {{ lista.nombre }}</h2>
-    <a href="{% url 'feed_lista' lista_id=lista.pk %}" class="link text-sm font-medium">
+    <a href="{% url 'list_feed' list_pk=lista.pk %}" class="link text-sm font-medium">
       <svg class="w-4 h-4 inline-block align-text-top mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M10 19l-7-7m0 0l7-7m-7 7h18"/>

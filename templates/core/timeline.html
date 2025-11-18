@@ -14,8 +14,28 @@
         {% endif %}
         {{ form.content }}
         <div class="flex items-center justify-between">
-          {{ form.image }}
-          <button class="px-4 py-2 bg-blue-600 text-white rounded-xl">Publicar</button>
+          <div class="flex items-center gap-3 mt-2">
+  <label 
+    for="id_image"
+    class="inline-block px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition"
+  >
+    Seleccionar imagen
+  </label>
+
+  <span id="image-name" class="text-gray-500 text-sm">
+    Ningún archivo seleccionado
+  </span>
+
+  <input 
+    id="id_image"
+    type="file"
+    name="image"
+    class="hidden"
+    onchange="document.getElementById('image-name').innerText = this.files[0]?.name ?? 'Ningún archivo seleccionado'"
+  >
+</div>
+
+          <button class="inline-block px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition">Publicar</button>
         </div>
       </form>
     </div>

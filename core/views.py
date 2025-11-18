@@ -168,6 +168,41 @@ def list_members(request, list_pk):
         return redirect('list_members', list_pk=lista.id)
     return render(request, 'core/list_members.html', {'lista': lista, 'miembros': miembros})
 
+@login_required
+def list_remove_member(request, list_pk, user_pk):
+    """
+    Vista para eliminar un usuario específico de una lista.
+    Solo el creador de la lista puede ejecutar esta acción.
+    """
+    if request.method == 'POST':
+        # 1. Obtener la Lista y verificar que el dueño sea el usuario actual
+        lista = get_object_or_404(Lista, pk=list_pk)
+        
+        # Seguridad: Solo el dueño/creador de la lista puede eliminar miembros
+        if lista.creador != request.user:
+            return HttpResponseForbidden("No tienes permiso para modificar esta lista.")
+
+        # 2. Obtener el usuario que se intenta eliminar
+        user_to_remove = get_object_or_404(User, pk=user_pk)
+        
+        # 3. Eliminar la relación de MiembroDeLista
+        try:
+            # Usamos 'usuario' para el campo del modelo, coincidiendo con la vista 'list_members'
+            MiembroDeLista.objects.filter(
+                lista=lista, 
+                usuario=user_to_remove
+            ).delete()
+            # Opcional: añadir un mensaje de éxito con django.contrib.messages
+        except:
+            # Si la relación no existe, simplemente ignoramos el error
+            pass
+
+        # 4. Redirigir de vuelta a la página de gestión de miembros
+        return redirect('list_members', list_pk=list_pk)
+    
+    # Si alguien intenta acceder por GET, lo redirigimos
+    return redirect('list_members', list_pk=list_pk)
+
 # --- VISTAS DE COLECCIONES ---
 @login_required
 def lista_colecciones(request):

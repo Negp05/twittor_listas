@@ -26,6 +26,8 @@ urlpatterns = [
     path('listas/crear/', views.list_create, name='list_create'),
     path('listas/<int:list_pk>/feed/', views.list_feed, name='list_feed'),
     path('listas/<int:list_pk>/miembros/', views.list_members, name='list_members'),
+    path('listas/<int:list_pk>/miembros/<int:user_pk>/eliminar/', views.list_remove_member, name='list_remove_member'),
+    
 
     # --- Colecciones ---
     path('colecciones/', views.lista_colecciones, name='lista_colecciones'),

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Notificaciones | Twittor{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-8">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Notificaciones</h2>
+
+  {% if notificaciones %}
+    <ul class="space-y-4">
+      {% for n in notificaciones %}
+        <li class="bg-white p-4 rounded-lg shadow border">
+          <div class="flex items-center justify-between">
+            <p>
+              <strong>@{{ n.actor.username }}</strong> {{ n.verb }}
+              {% if n.tweet %}
+                <a href="{{ n.tweet.get_absolute_url }}" class="text-blue-600 hover:underline">ver tweet</a>
+              {% endif %}
+            </p>
+            <span class="text-sm text-gray-500">{{ n.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500 bg-yellow-50 p-4 border border-yellow-200 rounded-lg">
+      No tienes notificaciones nuevas.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

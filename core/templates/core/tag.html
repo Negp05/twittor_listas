@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Hashtag: {{ tag }} | Twittor{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-8">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
+    {{ tag }}
+  </h2>
+
+  {% if tweets %}
+    <div class="space-y-4">
+      {% for tweet in tweets %}
+        {% include "core/tweet_card.html" with tweet=tweet %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-500 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+      No hay tweets con este hashtag todavía.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

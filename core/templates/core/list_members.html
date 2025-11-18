@@ -1,83 +1,60 @@
 {% extends "base.html" %}
-{% load static %}
-{% load i18n %}
 
-{% block title %}Gestionar Miembros | Twittor{% endblock %}
+{% block title %}Miembros de la lista{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto mt-8">
-  <div class="flex justify-between items-center border-b dark:border-white/10 pb-2 mb-6">
-    <h2 class="text-2xl font-bold">Gestionar Miembros de: {{ lista.nombre }}</h2>
-    <a href="{% url 'list_feed' list_pk=lista.pk %}" class="link text-sm font-medium">
-      <svg class="w-4 h-4 inline-block align-text-top mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-      </svg>
-      Volver al Feed
-    </a>
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- CABECERA -->
+  <div class="card p-6">
+    <h1 class="text-2xl font-bold mb-2">{{ lista.nombre }}</h1>
+    <p class="muted">{{ lista.descripcion }}</p>
   </div>
 
-  <h3 class="text-xl font-semibold mb-4 border-b dark:border-white/10 pb-2">Añadir Miembro</h3>
+  <!-- FORMULARIO PARA AÑADIR USUARIOS -->
+  <div class="card p-6 space-y-4">
+    <h2 class="text-lg font-semibold">Añadir usuario</h2>
 
-  <!-- Búsqueda de usuario -->
-  <form method="get" action="." class="flex gap-2 mb-6 p-4 card border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/50">
-    <input type="text" name="search" placeholder="Buscar usuario por @nombre_usuario"
-           value="{{ request.GET.search }}" class="flex-grow input">
-    <button type="submit" class="btn-primary">Buscar</button>
-  </form>
+    <form method="post" class="space-y-3">
+      {% csrf_token %}
 
-  {% if searched_user %}
-    <div class="mb-6 p-4 card">
-      <h4 class="text-lg font-semibold mb-3 border-b dark:border-white/10 pb-2">Resultado de la búsqueda</h4>
-      <div class="flex justify-between items-center">
-        <a href="{% url 'profile' username=searched_user.username %}" class="text-lg text-gray-800 dark:text-gray-100 hover:underline font-medium">
-          @{{ searched_user.username }}
-        </a>
+      <input type="text" name="username" placeholder="Nombre de usuario..." class="input">
 
-        <form method="post" action="{% url 'gestionar_miembros' lista_id=lista.pk %}">
-          {% csrf_token %}
-          <input type="hidden" name="user_id" value="{{ searched_user.pk }}">
-          <input type="hidden" name="action" value="add">
-
-          {% if searched_user in miembros %}
-            <button type="button" class="btn-outline px-3 py-1 text-sm disabled:opacity-100 disabled:cursor-default" disabled>
-              Ya es miembro
-            </button>
-          {% else %}
-            <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700 transition text-sm">
-              Añadir a la lista
-            </button>
-          {% endif %}
-        </form>
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- Miembros actuales -->
-  <h3 class="text-xl font-semibold mb-4 mt-8 border-t dark:border-white/10 pt-4">
-    Miembros Actuales ({{ miembros.count }})
-  </h3>
-  <div class="space-y-3 p-4 card">
-    {% for miembro in miembros %}
-      <div class="flex justify-between items-center p-2 border-b dark:border-white/10 last:border-b-0">
-        <a href="{% url 'profile' username=miembro.username %}" class="text-lg link">@{{ miembro.username }}</a>
-
-        {% if miembro != lista.creador %}
-          <form method="post" action="{% url 'gestionar_miembros' lista_id=lista.pk %}" class="inline">
-            {% csrf_token %}
-            <input type="hidden" name="user_id" value="{{ miembro.pk }}">
-            <input type="hidden" name="action" value="remove">
-            <button type="submit" class="text-red-500 hover:text-red-700 bg-transparent border border-red-500 hover:border-red-700 px-3 py-1 rounded-full transition text-sm">
-              Eliminar
-            </button>
-          </form>
-        {% else %}
-          <span class="chip bg-brand-600 text-white">Creador</span>
-        {% endif %}
-      </div>
-    {% empty %}
-      <p class="muted text-center py-4">No hay miembros en esta lista todavía.</p>
-    {% endfor %}
+      <button class="btn-primary w-full">Agregar</button>
+    </form>
   </div>
+
+  <!-- MIEMBROS -->
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold mb-4">Miembros</h2>
+
+    {% if miembros %}
+      <div class="space-y-4">
+        {% for m in miembros %}
+          <div class="flex items-center justify-between bg-white/40 dark:bg-gray-900/40 p-3 rounded-xl border border-gray-200/60 dark:border-gray-700/60">
+            <div class="flex items-center gap-3">
+              <img src="{{ m.usuario.profile.avatar.url }}" class="w-10 h-10 rounded-full" alt="">
+              <div>
+                <a href="{% url 'profile' m.usuario.username %}" class="font-semibold link">
+                  @{{ m.usuario.username }}
+                </a>
+                <p class="muted text-sm">{{ m.usuario.profile.bio|default:"Sin biografía" }}</p>
+              </div>
+            </div>
+
+            <!-- Botón eliminar -->
+            <form method="post" action="{% url 'list_remove_member' lista.id m.usuario.id %}">
+              {% csrf_token %}
+              <button class="btn-outline text-red-600">Eliminar</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <p class="muted text-center">No hay miembros en esta lista.</p>
+    {% endif %}
+  </div>
+
 </div>
 {% endblock %}

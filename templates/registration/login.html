@@ -1,37 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load extras %}
+
 {% block title %}Entrar - Twittor{% endblock %}
+
 {% block content %}
-<div class="grid md:grid-cols-2 gap-8 items-center min-h-[70vh]">
-  <div class="hidden md:block">
-    <div class="card p-8">
-      <h2 class="text-2xl font-bold mb-3">Bienvenido a Twittor</h2>
-      <p class="text-gray-600 dark:text-gray-300">Comparte ideas, sigue temas y conecta con personas en tiempo real.</p>
-      <ul class="mt-6 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-        <li>• Interfaz moderna con modo oscuro</li>
-        <li>• Hashtags, menciones y búsqueda</li>
-        <li>• Likes, respuestas, retuits y citas</li>
-      </ul>
+<div class="min-h-[75vh] flex items-center justify-center">
+  <div class="max-w-4xl w-full grid md:grid-cols-2 gap-8 p-4">
+
+    <!-- COLUMNA IZQUIERDA (Bienvenida) -->
+    <div class="hidden md:block">
+      <div class="card p-8 h-full flex flex-col justify-center">
+        <h2 class="text-3xl font-extrabold mb-4">Bienvenido a <span class="text-brand-600">Twittor</span></h2>
+        <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+
+        </p>
+
+        <ul class="mt-6 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+          <li>• Comparte ideas</li>
+          <li>• Sigue temas y conecta con personas en tiempo real</li>
+
+        </ul>
+      </div>
     </div>
-  </div>
-  <div>
-    <div class="card p-8">
-      <h1 class="text-2xl font-bold mb-6">Entrar</h1>
-      <form method="post" class="space-y-4">
-        {% csrf_token %}
-        <div>
-          <label class="block text-sm mb-1">Usuario</label>
-          <input type="text" name="username" autofocus required class="input">
-        </div>
-        <div>
-          <label class="block text-sm mb-1">Contraseña</label>
-          <input type="password" name="password" required class="input">
-        </div>
-        <button class="w-full btn-primary">Entrar</button>
-      </form>
-      <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">¿No tienes cuenta? <a href="{% url 'signup' %}" class="link">Crear cuenta</a></p>
+
+    <!-- COLUMNA DERECHA (Formulario de login) -->
+    <div>
+      <div class="card p-8">
+        <h1 class="text-2xl font-bold text-center mb-6">Entrar</h1>
+
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+
+          <div>
+            <label class="block text-sm mb-1 font-medium">Usuario</label>
+            <input type="text" name="username" autofocus required class="input">
+          </div>
+
+          <div>
+            <label class="block text-sm mb-1 font-medium">Contraseña</label>
+            <input type="password" name="password" required class="input">
+          </div>
+
+          <button class="w-full btn-primary">Entrar</button>
+        </form>
+
+        <p class="mt-4 text-sm text-center text-gray-600 dark:text-gray-300">
+          ¿No tienes cuenta?
+          <a href="{% url 'signup' %}" class="link font-semibold">Crear cuenta</a>
+        </p>
+      </div>
     </div>
+
   </div>
 </div>
+
+<footer class="text-center text-xs text-gray-500 my-6">
+  Hecho con <span class="text-brand-600">Django</span> + <span class="text-brand-600">Tailwind</span>. Proyecto educativo.
+</footer>
 {% endblock %}

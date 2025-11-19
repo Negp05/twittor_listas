@@ -4,21 +4,51 @@
 {% block title %}Citar publicación{% endblock %}
 {% block content %}
 <div class="max-w-2xl mx-auto space-y-4">
-  <article class="bg-white rounded-2xl shadow p-4">
+  <article class="bg-white dark:bg-gray-900 rounded-2xl shadow p-4">
     <div class="text-sm text-gray-500 dark:text-gray-300 mb-1">Publicación original de @{{ original.user.username }}</div>
     <p class="whitespace-pre-wrap">{{ original.content|linkify|safe }}</p>
   </article>
-  <div class="bg-white rounded-2xl shadow p-4">
+
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow p-4">
     <form method="post" enctype="multipart/form-data" class="space-y-3">
       {% csrf_token %}
       {{ form.non_field_errors }}
-      {% if form.errors %}<div class="text-red-600 text-sm">{{ form.errors }}</div>{% endif %}
-      {{ form.content }}
-      {{ form.image }}
+      {% if form.errors %}
+        <div class="text-red-600 text-sm">{{ form.errors }}</div>
+      {% endif %}
+
+      <textarea name="content" rows="4"
+        class="w-full rounded-xl border border-gray-300 dark:border-gray-700
+               bg-white dark:bg-gray-900
+               text-gray-900 dark:text-gray-100
+               px-3 py-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        {{ form.content.value }}
+      </textarea>
+
+      <div class="flex items-center gap-3">
+        <label class="px-4 py-2 bg-brand-600 text-white rounded-xl cursor-pointer hover:bg-brand-700 transition">
+            Seleccionar archivo
+            <input type="file" name="image" class="hidden" onchange="updateFileName(this)">
+        </label>
+
+        <span id="file-name" class="text-gray-400 dark:text-gray-300 text-sm">
+            Ningún archivo seleccionado
+        </span>
+      </div>
+
       <div class="text-right">
         <button class="px-4 py-2 bg-blue-600 text-white rounded-xl">Publicar cita</button>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+function updateFileName(input) {
+    const label = document.getElementById("file-name");
+    label.textContent = input.files.length > 0
+        ? input.files[0].name
+        : "Ningún archivo seleccionado";
+}
+</script>
 {% endblock %}

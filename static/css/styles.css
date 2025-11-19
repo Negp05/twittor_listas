@@ -48,3 +48,19 @@ body {
 .bg-brand-600 {
   @apply bg-blue-600;
 }
+
+/*modo oscuro */
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+}
+
+html[data-theme="dark"] {
+  --bg: #0d0d0d;
+  --text: #f2f2f2;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}

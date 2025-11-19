@@ -1,11 +1,67 @@
 {% extends "base.html" %}
-{% block content %}
-  <h2>Citar tweet de @{{ original.user.username }}</h2>
-  <p>{{ original.content }}</p>
 
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Publicar cita</button>
-  </form>
+{% block title %}Citar publicación{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-10 space-y-6">
+
+    <!-- Tarjeta con la publicación original -->
+    <div class="
+        p-6 rounded-xl border shadow-soft
+        bg-white border-gray-200 text-gray-800
+        dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100
+    ">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            Publicación original de @{{ original.user.username }}
+        </p>
+
+        <p class="mt-3 whitespace-pre-line">
+            {{ original.content }}
+        </p>
+    </div>
+
+    <!-- Tarjeta para escribir la cita -->
+    <div class="
+        p-6 rounded-xl border shadow-soft
+        bg-white border-gray-200 text-gray-800
+        dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100
+    ">
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Textarea estilo Twittor -->
+            <textarea
+                name="content"
+                rows="4"
+                maxlength="280"
+                placeholder="¿Qué está pasando? (280 máx.)"
+                class="
+                    w-full rounded-xl border px-4 py-3
+                    border-gray-300 bg-white text-gray-900
+                    dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100
+                    focus:ring-2 focus:ring-brand-500 focus:outline-none
+                "
+            >{{ form.content.value }}</textarea>
+
+            <!-- Input de imagen -->
+            <input
+                type="file"
+                name="image"
+                class="
+                    block w-full text-sm text-gray-700
+                    dark:text-gray-200
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-xl file:border-0
+                    file:bg-brand-600 file:text-white
+                    hover:file:bg-brand-700
+                "
+            >
+
+            <button type="submit" class="btn-primary w-full">
+                Publicar cita
+            </button>
+        </form>
+    </div>
+
+</div>
 {% endblock %}

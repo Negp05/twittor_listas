@@ -6,7 +6,10 @@ from .models import Tweet, Comment, UserProfile, Lista, Coleccion
 # --- Configuración base para estilos con Tailwind ---
 BASE_INPUT = {'class': 'input'}
 BASE_AREA = {'class': 'input min-h-[100px]'}
-BASE_FILE = {'class': 'file-input'}
+BASE_FILE = {
+    'class': 'px-4 py-2 bg-blue-600 text-white rounded-xl cursor-pointer hover:bg-blue-700 transition'
+}
+
 
 # --- Formulario de Tweets ---
 class TweetForm(forms.ModelForm):

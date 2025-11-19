@@ -4,6 +4,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+  } else if (theme === 'light') {
+      document.documentElement.classList.remove('dark');
+  }
+</script>
+
 
   <title>{% block title %}Twittor{% endblock %}</title>
 
@@ -41,11 +50,51 @@
       .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
       .btn-outline { @apply btn border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800; }
       .btn-ghost { @apply btn bg-white/0 hover:bg-gray-100 dark:hover:bg-gray-800; }
-      .input { @apply w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 focus:ring-2 focus:ring-brand-500; }
+      .input {
+      @apply 
+        w-full 
+        rounded-xl 
+        border 
+        border-gray-300 
+        dark:border-gray-700
+        bg-white 
+        dark:bg-gray-900
+        text-gray-900
+        dark:text-gray-100
+        px-3 py-2
+        focus:ring-2 
+        focus:ring-brand-500 
+        focus:outline-none;
+    }
       .card { @apply bg-white/80 dark:bg-gray-900/70 backdrop-blur rounded-2xl shadow-soft border border-white/50 dark:border-white/10; }
       .chip { @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200; }
       .fab { @apply fixed bottom-6 right-6 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 transition p-4; }
     }
+    @layer utilities {
+  /* Solo modo oscuro */
+  .dark input:-webkit-autofill {
+    box-shadow: 0 0 0px 1000px rgb(17 24 39) inset !important;
+    -webkit-text-fill-color: rgb(243 244 246) !important;
+  }
+
+  .dark input:-webkit-autofill:focus {
+    box-shadow: 0 0 0px 1000px rgb(17 24 39) inset !important;
+    -webkit-text-fill-color: rgb(243 244 246) !important;
+  }
+
+  /* Modo claro */
+  input:-webkit-autofill {
+    box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-text-fill-color: black !important;
+  }
+
+  input:-webkit-autofill:focus {
+    box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-text-fill-color: black !important;
+  }
+}
+
+
   </style>
 
   {% block head %}{% endblock %}
@@ -67,6 +116,9 @@
       </form>
 
       <div class="flex items-center gap-2 ml-auto">
+        <button id="theme-toggle" class="chip">
+            Cambiar tema
+        </button>
         <a href="{% url 'explore' %}" class="chip">Explorar</a>
 
         {% if user.is_authenticated %}
@@ -109,5 +161,6 @@
   </footer>
 
   <script src="{% static 'app.js' %}"></script>
+  <script src="{% static 'js/theme.js' %}"></script>
 </body>
 </html>
